@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guess The Impostor V2</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Guess The Impostor">
+<link rel="apple-touch-icon" img src="https://play-lh.googleusercontent.com/72-nBYr1HcePpiEMJWArwT2Em9x3uq5wuOK8VsWwMtTZXkFQW1wNNpGsHCp-yC4n1OhtXJvJUM879FTKPX47o48">
+</head>
+<body>
+
+<div class="container">
+
+  <h1>👽 Guess The Impostor</h1>
+
+  <!-- Setup -->
+  <div id="setup">
+    <h2>Entrez les joueurs</h2>
+    <div id="playersInputs"></div>
+    <button onclick="addPlayer()">+ Ajouter joueur</button>
+    <button onclick="startGame()">🎮 Commencer</button>
+  </div>
+
+  <!-- Catégories -->
+  <div id="categorySection">
+    <h2>Choisir une catégorie</h2>
+    <div id="categoryButtons"></div>
+    <button onclick="randomCategory()">🎲 Catégorie aléatoire</button>
+  </div>
+
+  <!-- Reveal -->
+  <div id="revealSection" class="hidden">
+    <h2 id="playerTurn"></h2>
+
+    <div class="flip-card" onclick="revealWord()">
+      <div class="flip-card-inner" id="cardInner">
+        <div class="flip-card-front">
+          Clique pour voir ton mot
+        </div>
+        <div class="flip-card-back" id="cardBack"></div>
+      </div>
+    </div>
+
+    <div class="timer-circle">
+      <span id="countdown">3</span>
+    </div>
+
+    <button id="nextBtn" class="hidden" onclick="nextPlayer()">Suivant</button>
+  </div>
+
+  <!-- Discussion -->
+  <div id="discussionSection" class="hidden">
+    <h2>🕵️ Discussion</h2>
+    <h1 id="discussionTimer"></h1>
+    <button onclick="showVote()">🗳 Voter</button>
+  </div>
+
+  <!-- Vote -->
+  <div id="voteSection" class="hidden">
+    <h2>Qui est l'imposteur ?</h2>
+    <div id="voteButtons"></div>
+  </div>
+
+  <!-- Result -->
+  <div id="resultSection" class="hidden">
+    <h2 id="resultText"></h2>
+    <button onclick="restartGame()">🔄 Rejouer</button>
+  </div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
