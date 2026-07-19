@@ -2,77 +2,396 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Guess The Impostor V2</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Café Imposteur ☕ - Jeu de Rôles et Bluff</title>
+  <!-- Google Fonts for premium typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <link rel="manifest" href="manifest.json">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Guess The Impostor">
-<link rel="apple-touch-icon" img src="https://play-lh.googleusercontent.com/72-nBYr1HcePpiEMJWArwT2Em9x3uq5wuOK8VsWwMtTZXkFQW1wNNpGsHCp-yC4n1OhtXJvJUM879FTKPX47o48">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Café Imposteur">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
 </head>
 <body>
 
-<div class="container">
+  <!-- Background neon particles overlay -->
+  <div class="bg-pulse"></div>
 
-  <h1>👽 Guess The Impostor</h1>
+  <!-- Interactive top navbar -->
+  <header class="app-header">
+    <div class="brand">
+      <span class="logo-icon">☕</span>
+      <span class="logo-text">Café Imposteur</span>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" onclick="openRulesModal()" title="Règles du jeu">
+        <svg viewBox="0 0 24 24" class="svg-icon"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 16h-2v-2h2v2zm1.07-7.75l-.9.92C12.45 11.9 12 12.5 12 14h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H7c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.04-.42 1.99-1.07 2.75z"/></svg>
+      </button>
+    </div>
+  </header>
 
-  <!-- Setup -->
-  <div id="setup">
-    <h2>Entrez les joueurs</h2>
-    <div id="playersInputs"></div>
-    <button onclick="addPlayer()">+ Ajouter joueur</button>
-    <button onclick="startGame()">🎮 Commencer</button>
-  </div>
+  <main class="container">
 
-  <!-- Catégories -->
-  <div id="categorySection">
-    <h2>Choisir une catégorie</h2>
-    <div id="categoryButtons"></div>
-    <button onclick="randomCategory()">🎲 Catégorie aléatoire</button>
-  </div>
+    <!-- Screen 1: SETUP SCREEN (Config & Players) -->
+    <section id="setupScreen" class="screen active">
+      <div class="hero-section">
+        <h1>Bluffez vos amis en terrasse</h1>
+        <p>Démasquez l'intrus avant qu'il ne comprenne le mot secret !</p>
+      </div>
 
-  <!-- Reveal -->
-  <div id="revealSection" class="hidden">
-    <h2 id="playerTurn"></h2>
+      <div class="setup-tabs">
+        <button id="tabPlayers" class="tab-btn active" onclick="switchSetupTab('players')">👥 Joueurs</button>
+        <button id="tabSettings" class="tab-btn" onclick="switchSetupTab('settings')">⚙️ Options</button>
+        <button id="tabCategories" class="tab-btn" onclick="switchSetupTab('categories')">📂 Catégories</button>
+      </div>
 
-    <div class="flip-card" onclick="revealWord()">
-      <div class="flip-card-inner" id="cardInner">
-        <div class="flip-card-front">
-          Clique pour voir ton mot
+      <!-- Setup Sub-pane 1: Players List -->
+      <div id="panePlayers" class="setup-pane active">
+        <div class="glass-card">
+          <div class="card-header">
+            <h3>Liste des suspects</h3>
+            <span class="badge" id="playerCountBadge">0 joueur</span>
+          </div>
+          
+          <div id="playersInputs" class="players-input-list">
+            <!-- Dynamically populated via JS -->
+          </div>
+
+          <div class="setup-actions-row">
+            <button class="btn secondary flex-btn" onclick="addPlayerField()">
+              <span>+ Ajouter Joueur</span>
+            </button>
+            <button class="btn secondary-dash flex-btn" onclick="loadDefaultPlayers()">
+              <span>🎲 Noms Aléatoires</span>
+            </button>
+          </div>
         </div>
-        <div class="flip-card-back" id="cardBack"></div>
+      </div>
+
+      <!-- Setup Sub-pane 2: Settings & Roles Options -->
+      <div id="paneSettings" class="setup-pane">
+        <div class="glass-card">
+          <h3>Paramètres de la partie</h3>
+          
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-title">Nombre d'Imposteurs 👽</span>
+              <span class="setting-desc">Les joueurs qui n'ont aucun mot.</span>
+            </div>
+            <div class="counter-input">
+              <button onclick="changeSetting('impostors', -1)">-</button>
+              <span id="impostorsCount">1</span>
+              <button onclick="changeSetting('impostors', 1)">+</button>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-title">Rôle "Infiltré" 🕵️‍♂️</span>
+              <span class="setting-desc">Reçoit un mot légèrement différent.</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="infiltrateToggle" checked onchange="saveOptionsState()">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-title">Minute de débat ⏳</span>
+              <span class="setting-desc">Temps imparti pour argumenter.</span>
+            </div>
+            <select id="timerDurationSelect" class="styled-select" onchange="saveOptionsState()">
+              <option value="30">30 secondes</option>
+              <option value="60">1 minute</option>
+              <option value="90">1 minute 30</option>
+              <option value="120" selected>2 minutes</option>
+              <option value="180">3 minutes</option>
+              <option value="0">Illimité</option>
+            </select>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-title">Effets sonores 🔊</span>
+              <span class="setting-desc">Générés par Web Audio API.</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="soundToggle" checked onchange="saveOptionsState()">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-title">Retour haptique 📳</span>
+              <span class="setting-desc">Vibrations de confirmation.</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="vibrationToggle" checked onchange="saveOptionsState()">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Setup Sub-pane 3: Categories Selection -->
+      <div id="paneCategories" class="setup-pane">
+        <div class="glass-card">
+          <div class="card-header">
+            <h3>Choisir un thème</h3>
+            <button class="btn accent-btn text-link-btn" onclick="openCustomCatScreen()">✏️ Gérer vos thèmes</button>
+          </div>
+          
+          <div id="categoryGrid" class="category-grid">
+            <!-- Dynamically populated via JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Start button sticky-bar or spacing -->
+      <div class="start-game-wrapper">
+        <button class="btn primary-accent btn-large" onclick="startGame()">
+          <span class="btn-ripple"></span>
+          <span>🎮 Commencer la partie</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Screen 2: INTERMEDIARY CONFIRMATION SCREEN (Peek Guard) -->
+    <section id="passScreen" class="screen hidden">
+      <div class="glass-card pass-card">
+        <div class="avatar-ring large-ring">
+          <span id="passIcon">🕵️‍♀️</span>
+        </div>
+        <h2>Écran de Sécurité</h2>
+        <p class="pass-instruction">Veuillez passer le téléphone à :</p>
+        <h1 id="passPlayerName" class="highlight-name">Joueur</h1>
+        
+        <div class="peek-guard-warning">
+          <svg viewBox="0 0 24 24" class="inline-svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+          Chut ! Cachez l'écran pour que les autres ne puissent pas voir votre mot.
+        </div>
+
+        <button class="btn primary btn-large" id="passConfirmBtn" onclick="proceedToReveal()">
+          🔓 Je suis prêt, afficher
+        </button>
+      </div>
+    </section>
+
+    <!-- Screen 3: WORD REVEAL SCREEN (Flip card) -->
+    <section id="revealScreen" class="screen hidden">
+      <div class="reveal-header">
+        <p>Bonjour <span id="revealPlayerTitle" class="glow-span">Joueur</span>,</p>
+        <h2>Veuillez mémoriser votre rôle</h2>
+      </div>
+
+      <div class="flip-card-container">
+        <div class="flip-card" id="flipCard" onclick="revealRoleWord()">
+          <div class="flip-card-inner">
+            <!-- Front of the card: Click to reveal -->
+            <div class="flip-card-front">
+              <div class="card-glow-border"></div>
+              <div class="front-content">
+                <span class="card-emoji">🔮</span>
+                <h3>Cliquez pour révéler</h3>
+                <p>N'oubliez pas de garder le secret !</p>
+              </div>
+            </div>
+            <!-- Back of the card: Word and details -->
+            <div class="flip-card-back" id="cardBack">
+              <div class="card-glow-border"></div>
+              <div class="back-content">
+                <span class="role-badge" id="roleBadge">Rôle</span>
+                <h1 id="roleWord" class="role-text-display">MOT</h1>
+                <p class="role-desc" id="roleDesc"></p>
+                <div class="memo-timer-preview">
+                  <div class="memo-bar" id="memoBar"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action items -->
+      <div class="reveal-actions">
+        <p class="action-help-text" id="revealActionHelp">Retiens bien ton rôle ! L'écran va se masquer.</p>
+        <button class="btn primary-accent btn-large hidden" id="revealNextBtn" onclick="finishRoleReveal()">
+          Masquer & Suivant ➔
+        </button>
+      </div>
+    </section>
+
+    <!-- Screen 4: DISCUSSION / TIMER SCREEN -->
+    <section id="discussionScreen" class="screen hidden">
+      <div class="glass-card disc-timer-card">
+        <h2>🕵️ Discussion & Débats</h2>
+        <p>Posez des questions subtiles pour identifier qui a un mot différent ou pas de mot du tout !</p>
+
+        <!-- Dynamic Circular SVG Timer -->
+        <div class="svg-timer-container">
+          <svg class="progress-ring" width="220" height="220">
+            <circle class="progress-ring-bg" stroke="rgba(255,255,255,0.06)" stroke-width="8" fill="transparent" r="95" cx="110" cy="110" />
+            <circle class="progress-ring-fill" id="timerProgressCircle" stroke="#6366f1" stroke-width="8" fill="transparent" r="95" cx="110" cy="110" />
+          </svg>
+          <div class="timer-inner-content">
+            <h1 id="countdownText" class="countdown-digits">02:00</h1>
+            <span class="timer-lbl" id="timerStatusLabel">En cours...</span>
+          </div>
+        </div>
+
+        <div class="timer-controls">
+          <button class="btn secondary icon-only-btn" id="btnPauseResume" onclick="toggleTimer()">
+            <!-- Pause Icon -->
+            <svg viewBox="0 0 24 24" id="svgPlayPause" class="svg-icon"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+          </button>
+          <button class="btn secondary icon-only-btn" onclick="addExtraTime(30)" title="+30 secondes">
+            +30s
+          </button>
+        </div>
+
+        <!-- Suspicion checklist so they don't get lost -->
+        <div class="suspicion-tracker">
+          <h4>Aide-mémoire de suspicions</h4>
+          <p class="tracker-desc">Cochez les joueurs blanchis par vos débats</p>
+          <div id="discussionChecklist" class="tracker-grid">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+
+        <button class="btn primary-accent btn-large btn-margin-top" onclick="proceedToVote()">
+          🗳️ Voter pour l'Imposteur
+        </button>
+      </div>
+    </section>
+
+    <!-- Screen 5: VOTE SCREEN (Select who is eliminated) -->
+    <section id="voteScreen" class="screen hidden">
+      <div class="vote-header">
+        <h1>Qui est l'Imposteur ?</h1>
+        <p>Désignez le joueur majoritairement suspecté lors des débats.</p>
+      </div>
+
+      <div id="voteGrid" class="vote-grid-list">
+        <!-- Dyn list of candidates -->
+      </div>
+    </section>
+
+    <!-- Screen 6: GUESS THE WORD IF IMPOSTOR ELIMINATED -->
+    <section id="guessScreen" class="screen hidden">
+      <div class="glass-card guess-container">
+        <div class="alert-icon">⭐</div>
+        <h2>Dernière chance !</h2>
+        <p>L'Imposteur (<span id="guessImpostorName" class="text-orange">Nom</span>) a été démasqué !</p>
+        <p class="emphasis-text">Pour voler la victoire aux Citoyens, il doit deviner leur mot secret :</p>
+        
+        <div id="guessOptionsList" class="options-button-list">
+          <!-- Dynamically populated with 4 choice buttons -->
+        </div>
+
+        <p class="timer-note">Attention, une seule réponse possible !</p>
+      </div>
+    </section>
+
+    <!-- Screen 7: GAME RESULTS -->
+    <section id="resultScreen" class="screen hidden">
+      <div class="glass-card result-summary-card">
+        <div class="result-banner" id="resultBanner">
+          <span class="victory-emoji" id="resultEmoji">🎉</span>
+          <h1 id="resultSummaryTitle">Victoire des Citoyens !</h1>
+          <p id="resultSummarySubtitle">L'Imposteur n'a pas réussi à bluffer le groupe.</p>
+        </div>
+
+        <div class="summary-details">
+          <h3>Bilan de la table :</h3>
+          <div class="summary-table" id="summaryList">
+            <!-- Dynamic listing -->
+          </div>
+        </div>
+
+        <div class="result-actions">
+          <button class="btn primary btn-large" onclick="restartSameGame()">🔄 Faire une autre partie</button>
+          <button class="btn secondary btn-large" onclick="backToSetup()">⚙️ Changer de configuration</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 8: CUSTOM CATEGORIES MANAGEMENT SCREEN -->
+    <section id="customCatScreen" class="screen hidden">
+      <div class="sub-header">
+        <button class="back-link-btn" onclick="closeCustomCatScreen()">➔ Retour aux réglages</button>
+        <h2>Éditeur de thèmes</h2>
+      </div>
+
+      <div class="glass-card editor-card">
+        <h3>Créer un thème personnalisé</h3>
+        <div class="input-group">
+          <label for="customCatName">Nom de la catégorie *</label>
+          <input type="text" id="customCatName" placeholder="Ex: Randonnée, Séries Sci-Fi">
+        </div>
+        
+        <div class="word-pairs-box">
+          <div class="words-helper">
+            <h4>Paires de mots apparentés</h4>
+            <p>Saisissez le mot pour le <strong>Citoyen</strong> et un mot proche pour l'<strong>Infiltré</strong>. Un par ligne.</p>
+            <p class="example-text">Ex: <em>Chien | Chat</em> ou <em>Café | Thé</em></p>
+          </div>
+
+          <div id="customWordPairsContainer">
+            <div class="word-pair-inputs">
+              <input type="text" class="word-citoyen" placeholder="Mot Citoyen">
+              <span class="vs-divider">|</span>
+              <input type="text" class="word-infiltre" placeholder="Mot Infiltré">
+            </div>
+          </div>
+          <button class="btn text-link-btn" onclick="addCustomWordPairRow()">+ Ajouter une paire de mots</button>
+        </div>
+
+        <button class="btn primary-accent btn-large" onclick="saveCustomCategory()">💾 Sauvegarder ce thème</button>
+      </div>
+
+      <div class="glass-card editor-card margin-top-card">
+        <h3>Vos thèmes personnalisés</h3>
+        <div id="customCategoriesList" class="custom-cat-list">
+          <!-- Populated from localStorage -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Rules modal -->
+  <div id="rulesModal" class="modal-overlay hidden" onclick="closeRulesModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Règles de Café Imposteur</h2>
+        <button class="close-btn" onclick="closeRulesModal()">&times;</button>
+      </div>
+      <div class="modal-body-content">
+        <p><strong>Café Imposteur</strong> est un jeu d'ambiance et de déduction sociale à un téléphone.</p>
+        
+        <h3>🎭 Rôles :</h3>
+        <ul>
+          <li><strong>Citoyen (Innocent) :</strong> Vous connaissez le mot secret. Parlez-en subtilement sans le donner directement.</li>
+          <li><strong>Infiltré (Undercover) :</strong> Vous avez un mot légèrement différent. Vous pensez être Citoyen, restez aux aguets !</li>
+          <li><strong>Imposteur :</strong> Vous n'avez pas de mot. Vous devez faire semblant d'en avoir un et déduire le mot des Citoyens du débat.</li>
+        </ul>
+
+        <h3>📝 Déroulement :</h3>
+        <ol>
+          <li>Distribuez le téléphone pour regarder chacun son mot secret à l'abri des regards.</li>
+          <li>Discutez durant le temps imparti. Chaque joueur doit décrire son mot par un adjectif ou mot simple.</li>
+          <li>Votez pour éliminer la personne de votre choix.</li>
+          <li>Si l'Imposteur est démasqué, il a une dernière chance de deviner le mot secret des Citoyens parmi 4 propositions !</li>
+        </ol>
       </div>
     </div>
-
-    <div class="timer-circle">
-      <span id="countdown">3</span>
-    </div>
-
-    <button id="nextBtn" class="hidden" onclick="nextPlayer()">Suivant</button>
   </div>
 
-  <!-- Discussion -->
-  <div id="discussionSection" class="hidden">
-    <h2>🕵️ Discussion</h2>
-    <h1 id="discussionTimer"></h1>
-    <button onclick="showVote()">🗳 Voter</button>
-  </div>
-
-  <!-- Vote -->
-  <div id="voteSection" class="hidden">
-    <h2>Qui est l'imposteur ?</h2>
-    <div id="voteButtons"></div>
-  </div>
-
-  <!-- Result -->
-  <div id="resultSection" class="hidden">
-    <h2 id="resultText"></h2>
-    <button onclick="restartGame()">🔄 Rejouer</button>
-  </div>
-
-</div>
-
-<script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
